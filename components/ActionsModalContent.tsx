@@ -46,6 +46,17 @@ interface Props {
 }
 
 export const ShareInput = ({ file, onInputChange, onRemove, errorMessage }: Props) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      const value = e.currentTarget.value.trim();
+      if (value) {
+        onInputChange([value]);
+        e.currentTarget.value = ""; // clear input
+      }
+    }
+  };
+
   return (
     <>
       <ImageThumbnail file={file} />
@@ -58,7 +69,15 @@ export const ShareInput = ({ file, onInputChange, onRemove, errorMessage }: Prop
         <Input
           type="email"
           placeholder="Enter email address"
-          onChange={(e) => onInputChange(e.target.value.trim().split(","))}
+          onKeyDown={handleKeyDown}
+          onChange={(e) => {
+            const v = e.target.value;
+            if (v.endsWith(",")) {
+              const cleaned = v.replace(",", "").trim();
+              if (cleaned) onInputChange([cleaned]);
+              e.target.value = "";
+            }
+          }}
           className="share-input-field"
         />
 

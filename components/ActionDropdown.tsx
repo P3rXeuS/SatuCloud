@@ -79,22 +79,50 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setIsLoading(false);
   };
 
-  // 🔥 VALIDASI EMAIL
   const handleShareInput = async (list: string[]) => {
     setErrorMessage("");
 
-    const email = list[0];
+    const cleanedList = list
+      .map((e) => e.trim().toLowerCase())
+      .filter((e) => e !== "");
 
-    if (!email) return;
+    if (cleanedList.length === 0) return;
 
-    const exists = await checkUserExists(email);
+    const newValidEmails: string[] = [];
+    const errors: string[] = [];
 
-    if (!exists) {
-      setErrorMessage(`Email "${email}" tidak terdaftar.`);
-      return;
+    for (const email of cleanedList) {
+      if (emails.includes(email) || file.users.includes(email)) {
+        errors.push(`Email "${email}" sudah ditambahkan.`);
+        continue;
+      }
+
+      const exists = await checkUserExists(email);
+
+      if (!exists) {
+        errors.push(`Email "${email}" tidak terdaftar.`);
+        continue;
+      }
+
+      newValidEmails.push(email);
     }
 
-    setEmails([email]);
+    if (errors.length > 0) {
+      setErrorMessage(errors.join(" | "));
+    }
+
+    if (newValidEmails.length > 0) {
+
+      setEmails((prev) => [...prev, ...newValidEmails]);
+
+      file.users.push(...newValidEmails);
+
+      await updateFileUsers({
+        fileId: file.$id,
+        emails: [...file.users],
+        path,
+      });
+    }
   };
 
   const handleRemoveUser = async (email: string) => {
