@@ -42,9 +42,10 @@ interface Props {
   file: Models.Document;
   onInputChange: React.Dispatch<React.SetStateAction<string[]>>;
   onRemove: (email: string) => void;
+  errorMessage?: string; // added
 }
 
-export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
+export const ShareInput = ({ file, onInputChange, onRemove, errorMessage }: Props) => {
   return (
     <>
       <ImageThumbnail file={file} />
@@ -53,12 +54,18 @@ export const ShareInput = ({ file, onInputChange, onRemove }: Props) => {
         <p className="subtitle-2 pl-1 text-light-100">
           Share file with other users
         </p>
+
         <Input
           type="email"
           placeholder="Enter email address"
           onChange={(e) => onInputChange(e.target.value.trim().split(","))}
           className="share-input-field"
         />
+
+        {errorMessage && (
+          <p className="text-red-500 text-sm pl-1 pt-1">{errorMessage}</p>
+        )}
+
         <div className="pt-4">
           <div className="flex justify-between">
             <p className="subtitle-2 text-light-100">Shared with</p>
